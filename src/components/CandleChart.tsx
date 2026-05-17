@@ -4,6 +4,8 @@ import { calculateEmaSeries, type ChartPresetResult } from '../../shared/automat
 import type { AnalysisResponse, Candle, DerivedContext } from '../../shared/types'
 
 interface CandleChartProps {
+  symbol: string
+  timeframe: string
   candles: Candle[]
   analysis: AnalysisResponse | null
   chartPreset: ChartPresetResult | null
@@ -29,12 +31,13 @@ function toLineData(candles: Candle[], values: Array<number | null>): LineData[]
       }]))
 }
 
-export function CandleChart({ candles, analysis, chartPreset, context }: CandleChartProps) {
+export function CandleChart({ symbol, timeframe, candles, analysis, chartPreset, context }: CandleChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null)
   const priceLinesRef = useRef<IPriceLine[]>([])
   const overlaySeriesRef = useRef<ISeriesApi<'Line'>[]>([])
+  const shouldAutoFitRef = useRef(true)
 
   useEffect(() => {
     if (!containerRef.current || chartRef.current) {
@@ -57,6 +60,19 @@ export function CandleChart({ candles, analysis, chartPreset, context }: CandleC
       },
       timeScale: {
         borderColor: 'rgba(148, 163, 184, 0.20)',
+        rightOffset: 14,
+        fixRightEdge: false,
+        shiftVisibleRangeOnNewBar: false,
+      },
+      handleScroll: {
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+      },
+      handleScale: {
+        mouseWheel: true,
+        pinch: true,
+        axisPressedMouseMove: true,
       },
       crosshair: {
         vertLine: {
@@ -94,8 +110,15 @@ export function CandleChart({ candles, analysis, chartPreset, context }: CandleC
     }
 
     seriesRef.current.setData(toChartData(candles))
-    chartRef.current?.timeScale().fitContent()
+    if (shouldAutoFitRef.current) {
+      chartRef.current?.timeScale().fitContent()
+      shouldAutoFitRef.current = false
+    }
   }, [candles])
+
+  useEffect(() => {
+    shouldAutoFitRef.current = true
+  }, [symbol, timeframe])
 
   useEffect(() => {
     const series = seriesRef.current
