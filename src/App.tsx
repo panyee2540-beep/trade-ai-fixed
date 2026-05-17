@@ -94,6 +94,14 @@ function safeJsonParse<T>(raw: string | null, fallback: T) {
   }
 }
 
+function formatAnalysisError(message: string) {
+  if (message.includes('429') || message.toLowerCase().includes('quota') || message.toLowerCase().includes('billing')) {
+    return 'AI provider quota ของ OPENAI_API_KEY บน Netlify หมดหรือถูกจำกัดชั่วคราว (429) ไม่ใช่ token ในแชตนี้ ให้เติมเครดิต/เปิด billing แล้ว deploy ใหม่'
+  }
+
+  return message
+}
+
 function App() {
   const [activeView, setActiveView] = useState<AppView>('dashboard')
   const [openTool, setOpenTool] = useState<AutomationTool>('chart')
@@ -294,7 +302,7 @@ function App() {
       startTransition(() => {
         setAnalysis(fallback)
         setAnalysisState('error')
-        setAnalysisError(message)
+        setAnalysisError(formatAnalysisError(message))
       })
       return fallback
     }
@@ -583,7 +591,7 @@ function App() {
       ) : null}
 
       {error ? <div className="notice notice--error">{error}</div> : null}
-      {analysisError ? <div className="notice notice--warning">AI fallback mode: {analysisError}</div> : null}
+      {analysisError ? <div className="notice notice--warning">AI fallback mode: ระบบสลับไปใช้การวิเคราะห์สำรองชั่วคราว - {analysisError}</div> : null}
 
       {activeView === 'dashboard' ? (
         <section className="page page--dashboard">
@@ -601,7 +609,7 @@ function App() {
                   </span>
                 </div>
               </div>
-              <CandleChart candles={data?.candles ?? []} analysis={analysis} chartPreset={chartPreset} context={derived} />
+              <CandleChart symbol={selectedSymbol} timeframe={timeframe} candles={data?.candles ?? []} analysis={analysis} chartPreset={chartPreset} context={derived} />
               <div className="chart-panel__meta">
                 <div>
                   <span>24h high</span>
