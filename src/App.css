@@ -433,17 +433,134 @@
   padding: 1rem;
 }
 
+.automation-lab {
+  margin-top: 1.2rem;
+  padding: 1.2rem;
+  border-radius: 28px;
+  backdrop-filter: blur(18px);
+  background:
+    linear-gradient(160deg, rgba(8, 15, 32, 0.94), rgba(8, 20, 29, 0.92)),
+    var(--panel);
+  border: 1px solid rgba(67, 214, 205, 0.16);
+  box-shadow: var(--shadow);
+}
+
+.automation-lab__header,
+.automation-grid,
+.automation-card__header,
+.form-grid,
+.prompt-output,
+.automation-lab__badge {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.automation-lab__header {
+  grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.8fr);
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+.automation-lab__header h2 {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+}
+
+.automation-lab__header p,
+.automation-card__header p,
+.prompt-output p {
+  margin: 0;
+  color: #cbd5e1;
+}
+
+.automation-lab__badge {
+  padding: 1rem;
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.68);
+  border: 1px solid rgba(45, 212, 191, 0.18);
+}
+
+.automation-lab__badge strong {
+  color: #99f6e4;
+}
+
+.automation-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.automation-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 24px;
+  background: rgba(2, 6, 23, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid label {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.form-grid span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.form-grid__full {
+  grid-column: 1 / -1;
+}
+
+.form-grid input,
+.form-grid textarea {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(2, 6, 23, 0.56);
+  color: var(--text);
+  padding: 0.9rem 0.95rem;
+  outline: none;
+  resize: vertical;
+}
+
+.form-grid input:focus,
+.form-grid textarea:focus {
+  border-color: rgba(45, 212, 191, 0.38);
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
+}
+
+.prompt-output {
+  padding: 1rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.85), rgba(2, 6, 23, 0.75));
+  border: 1px solid rgba(45, 212, 191, 0.16);
+}
+
+.prompt-output p {
+  line-height: 1.65;
+}
+
 @media (max-width: 1080px) {
   .workspace,
   .hero-banner,
   .steps-grid,
-  .closure-grid {
+  .closure-grid,
+  .automation-lab__header,
+  .automation-grid {
     grid-template-columns: 1fr;
   }
 
   .chart-panel__meta,
   .card-grid,
-  .zone-grid {
+  .zone-grid,
+  .form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -469,7 +586,8 @@
   .zone-grid,
   .snapshot-card__grid,
   .timeframe-grid,
-  .closure-grid {
+  .closure-grid,
+  .form-grid {
     grid-template-columns: 1fr;
   }
 

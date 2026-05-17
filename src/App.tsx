@@ -50,6 +50,14 @@ function biasToneClass(value: string) {
   return 'tone tone--sideways'
 }
 
+function sanitizeCommaList(value: string) {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join(', ')
+}
+
 function App() {
   const [selectedSymbol, setSelectedSymbol] = useState(DEFAULT_SYMBOL)
   const [timeframe, setTimeframe] = useState<MarketInterval>(DEFAULT_INTERVAL)
@@ -61,6 +69,32 @@ function App() {
   const [analysisState, setAnalysisState] = useState<'idle' | 'loading' | 'error'>('idle')
   const [analysisError, setAnalysisError] = useState<string | null>(null)
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null)
+  const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null)
+  const [chartAsset, setChartAsset] = useState('BTCUSDT')
+  const [chartTimeframe, setChartTimeframe] = useState('1H')
+  const [chartIndicators, setChartIndicators] = useState('RSI, MACD')
+  const [chartTools, setChartTools] = useState('Fibonacci levels, trendlines')
+  const [chartZone, setChartZone] = useState('golden pocket zone')
+  const [chartPatterns, setChartPatterns] = useState('order blocks, FVGs')
+  const [chartLayout, setChartLayout] = useState('2x2')
+  const [chartComparisons, setChartComparisons] = useState('ETHUSDT, SOLUSDT')
+  const [strategyType, setStrategyType] = useState('trend-following')
+  const [strategyAsset, setStrategyAsset] = useState('BTCUSDT')
+  const [strategyTimeframe, setStrategyTimeframe] = useState('1H')
+  const [strategyEntryRule, setStrategyEntryRule] = useState('EMA 20 crosses above EMA 50')
+  const [strategyStopLoss, setStrategyStopLoss] = useState('5')
+  const [strategyTakeProfit, setStrategyTakeProfit] = useState('15')
+  const [strategyOptimizeTarget, setStrategyOptimizeTarget] = useState('EMA periods')
+  const [strategyGoal, setStrategyGoal] = useState('profit factor')
+  const [scanAssets, setScanAssets] = useState('BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT')
+  const [scanTimeframes, setScanTimeframes] = useState('Daily, Weekly')
+  const [scanCondition, setScanCondition] = useState('bullish confluence / strong breakout')
+  const [alertAsset, setAlertAsset] = useState('XAUUSD')
+  const [alertDirection, setAlertDirection] = useState('crosses above')
+  const [alertPrice, setAlertPrice] = useState('2000')
+  const [alertCondition, setAlertCondition] = useState('RSI over 70')
+  const [alertChannel, setAlertChannel] = useState('Telegram')
+  const [alertAnalysisFocus, setAlertAnalysisFocus] = useState('breakout strength / reversal potential')
 
   const { data, connectionState, error } = useMarketData(selectedSymbol, timeframe)
   const derived = deriveAnalysisContext(data?.candles ?? [])
@@ -100,6 +134,15 @@ function App() {
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   }, [])
 
+  useEffect(() => {
+    if (!copiedPrompt) {
+      return
+    }
+
+    const timer = window.setTimeout(() => setCopiedPrompt(null), 1800)
+    return () => window.clearTimeout(timer)
+  }, [copiedPrompt])
+
   async function handleAnalyze() {
     if (!data?.candles?.length) {
       return
@@ -133,6 +176,23 @@ function App() {
     await installEvent.userChoice
     setInstallEvent(null)
   }
+
+  async function handleCopyPrompt(kind: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedPrompt(kind)
+    } catch {
+      setCopiedPrompt(null)
+    }
+  }
+
+  const chartAutomationPrompt = `Switch to ${chartAsset} ${chartTimeframe}, add ${sanitizeCommaList(chartIndicators)}, draw ${sanitizeCommaList(chartTools)}, highlight the ${chartZone}, identify and draw ${sanitizeCommaList(chartPatterns)}, switch to ${chartLayout} layout with ${sanitizeCommaList(chartComparisons)} on the side charts, enable crosshair sync, and take a screenshot.`
+
+  const strategyPrompt = `Write a Pine Script ${strategyType} strategy for ${strategyAsset} on ${strategyTimeframe} that enters long when ${strategyEntryRule}. Add a ${strategyStopLoss}% stop loss and ${strategyTakeProfit}% take profit. Backtest it, show me the performance report, then optimize the ${strategyOptimizeTarget} to maximize the ${strategyGoal}.`
+
+  const scanPrompt = `Analyze ${sanitizeCommaList(scanAssets)} across ${sanitizeCommaList(scanTimeframes)} timeframes. Show me which ones have ${scanCondition} and which are mixed.`
+
+  const alertPrompt = `Alert me when ${alertAsset} ${alertDirection} ${alertPrice} with ${alertCondition}, and monitor it on ${alertChannel} so you analyze the ${alertAnalysisFocus} when it hits.`
 
   return (
     <div className="shell">
@@ -413,6 +473,189 @@ function App() {
             </div>
           )}
         </StepCard>
+      </section>
+
+      <section className="automation-lab">
+        <div className="automation-lab__header">
+          <div>
+            <span className="eyebrow">AI workflow studio</span>
+            <h2>Automation Lab</h2>
+            <p>
+              Build copy-ready prompts for chart prep, Pine Script strategy work, basket scanning, and alert workflows.
+              This version generates instructions for your AI/chart stack rather than controlling external platforms directly.
+            </p>
+          </div>
+          <div className="automation-lab__badge">
+            <strong>Token-smart</strong>
+            <span>Prompt drafting is local. OpenAI is only used when you run analysis.</span>
+          </div>
+        </div>
+
+        <div className="automation-grid">
+          <section className="automation-card">
+            <div className="automation-card__header">
+              <span className="step-card__step">1. Chart Auto-Prep</span>
+              <p>Generate a ready instruction for switching charts, adding indicators, drawing tools, and preparing screenshots.</p>
+            </div>
+            <div className="form-grid">
+              <label>
+                <span>Asset</span>
+                <input value={chartAsset} onChange={(event) => setChartAsset(event.target.value.toUpperCase())} />
+              </label>
+              <label>
+                <span>Timeframe</span>
+                <input value={chartTimeframe} onChange={(event) => setChartTimeframe(event.target.value.toUpperCase())} />
+              </label>
+              <label className="form-grid__full">
+                <span>Indicators</span>
+                <input value={chartIndicators} onChange={(event) => setChartIndicators(event.target.value)} />
+              </label>
+              <label className="form-grid__full">
+                <span>Drawing tools</span>
+                <input value={chartTools} onChange={(event) => setChartTools(event.target.value)} />
+              </label>
+              <label>
+                <span>Key zone</span>
+                <input value={chartZone} onChange={(event) => setChartZone(event.target.value)} />
+              </label>
+              <label>
+                <span>Patterns to identify</span>
+                <input value={chartPatterns} onChange={(event) => setChartPatterns(event.target.value)} />
+              </label>
+              <label>
+                <span>Layout</span>
+                <input value={chartLayout} onChange={(event) => setChartLayout(event.target.value)} />
+              </label>
+              <label>
+                <span>Side charts</span>
+                <input value={chartComparisons} onChange={(event) => setChartComparisons(event.target.value.toUpperCase())} />
+              </label>
+            </div>
+            <div className="prompt-output">
+              <span className="panel-label">Generated prompt</span>
+              <p>{chartAutomationPrompt}</p>
+            </div>
+            <button type="button" className="button button--secondary" onClick={() => handleCopyPrompt('chart', chartAutomationPrompt)}>
+              {copiedPrompt === 'chart' ? 'Copied chart prompt' : 'Copy chart prompt'}
+            </button>
+          </section>
+
+          <section className="automation-card">
+            <div className="automation-card__header">
+              <span className="step-card__step">2. Strategy & Backtest</span>
+              <p>Draft a Pine Script and optimization brief so your AI can write, backtest, and refine a strategy faster.</p>
+            </div>
+            <div className="form-grid">
+              <label>
+                <span>Strategy type</span>
+                <input value={strategyType} onChange={(event) => setStrategyType(event.target.value)} />
+              </label>
+              <label>
+                <span>Asset</span>
+                <input value={strategyAsset} onChange={(event) => setStrategyAsset(event.target.value.toUpperCase())} />
+              </label>
+              <label>
+                <span>Timeframe</span>
+                <input value={strategyTimeframe} onChange={(event) => setStrategyTimeframe(event.target.value.toUpperCase())} />
+              </label>
+              <label>
+                <span>Optimize</span>
+                <input value={strategyOptimizeTarget} onChange={(event) => setStrategyOptimizeTarget(event.target.value)} />
+              </label>
+              <label className="form-grid__full">
+                <span>Entry rule</span>
+                <input value={strategyEntryRule} onChange={(event) => setStrategyEntryRule(event.target.value)} />
+              </label>
+              <label>
+                <span>Stop loss %</span>
+                <input value={strategyStopLoss} onChange={(event) => setStrategyStopLoss(event.target.value)} />
+              </label>
+              <label>
+                <span>Take profit %</span>
+                <input value={strategyTakeProfit} onChange={(event) => setStrategyTakeProfit(event.target.value)} />
+              </label>
+              <label className="form-grid__full">
+                <span>Optimization goal</span>
+                <input value={strategyGoal} onChange={(event) => setStrategyGoal(event.target.value)} />
+              </label>
+            </div>
+            <div className="prompt-output">
+              <span className="panel-label">Generated prompt</span>
+              <p>{strategyPrompt}</p>
+            </div>
+            <button type="button" className="button button--secondary" onClick={() => handleCopyPrompt('strategy', strategyPrompt)}>
+              {copiedPrompt === 'strategy' ? 'Copied strategy prompt' : 'Copy strategy prompt'}
+            </button>
+          </section>
+
+          <section className="automation-card">
+            <div className="automation-card__header">
+              <span className="step-card__step">3. Multi-Asset Scan</span>
+              <p>Turn a basket of symbols into one scan request so you can compare confluence and breakout quality quickly.</p>
+            </div>
+            <div className="form-grid">
+              <label className="form-grid__full">
+                <span>Assets</span>
+                <textarea rows={3} value={scanAssets} onChange={(event) => setScanAssets(event.target.value.toUpperCase())} />
+              </label>
+              <label>
+                <span>Timeframes</span>
+                <input value={scanTimeframes} onChange={(event) => setScanTimeframes(event.target.value)} />
+              </label>
+              <label>
+                <span>Condition</span>
+                <input value={scanCondition} onChange={(event) => setScanCondition(event.target.value)} />
+              </label>
+            </div>
+            <div className="prompt-output">
+              <span className="panel-label">Generated prompt</span>
+              <p>{scanPrompt}</p>
+            </div>
+            <button type="button" className="button button--secondary" onClick={() => handleCopyPrompt('scan', scanPrompt)}>
+              {copiedPrompt === 'scan' ? 'Copied scan prompt' : 'Copy scan prompt'}
+            </button>
+          </section>
+
+          <section className="automation-card">
+            <div className="automation-card__header">
+              <span className="step-card__step">4. Smart Alert Brief</span>
+              <p>Prepare an alert instruction for Telegram or another alert channel, with the exact follow-up analysis you want.</p>
+            </div>
+            <div className="form-grid">
+              <label>
+                <span>Asset</span>
+                <input value={alertAsset} onChange={(event) => setAlertAsset(event.target.value.toUpperCase())} />
+              </label>
+              <label>
+                <span>Direction</span>
+                <input value={alertDirection} onChange={(event) => setAlertDirection(event.target.value)} />
+              </label>
+              <label>
+                <span>Price level</span>
+                <input value={alertPrice} onChange={(event) => setAlertPrice(event.target.value)} />
+              </label>
+              <label>
+                <span>Alert channel</span>
+                <input value={alertChannel} onChange={(event) => setAlertChannel(event.target.value)} />
+              </label>
+              <label className="form-grid__full">
+                <span>Extra condition</span>
+                <input value={alertCondition} onChange={(event) => setAlertCondition(event.target.value)} />
+              </label>
+              <label className="form-grid__full">
+                <span>Follow-up analysis focus</span>
+                <input value={alertAnalysisFocus} onChange={(event) => setAlertAnalysisFocus(event.target.value)} />
+              </label>
+            </div>
+            <div className="prompt-output">
+              <span className="panel-label">Generated prompt</span>
+              <p>{alertPrompt}</p>
+            </div>
+            <button type="button" className="button button--secondary" onClick={() => handleCopyPrompt('alert', alertPrompt)}>
+              {copiedPrompt === 'alert' ? 'Copied alert prompt' : 'Copy alert prompt'}
+            </button>
+          </section>
+        </div>
       </section>
     </div>
   )
