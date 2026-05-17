@@ -30,6 +30,10 @@ function toNumber(value: string | number) {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+function normalizeSearchToken(value: string) {
+  return value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
+}
+
 function validateInterval(interval: string): MarketInterval {
   if (MARKET_INTERVALS.includes(interval as MarketInterval)) {
     return interval as MarketInterval
@@ -77,7 +81,7 @@ async function fetchExchangeInfo() {
 }
 
 export async function searchMarketSymbols(query: string): Promise<MarketSearchResponse> {
-  const normalizedQuery = query.trim().toUpperCase()
+  const normalizedQuery = normalizeSearchToken(query)
   const symbols = await fetchExchangeInfo()
 
   const filtered = normalizedQuery.length === 0
@@ -86,10 +90,10 @@ export async function searchMarketSymbols(query: string): Promise<MarketSearchRe
         .filter((symbol): symbol is MarketSymbol => Boolean(symbol))
     : symbols.filter((symbol) =>
         symbol.symbol.includes(normalizedQuery)
-        || symbol.baseAsset.includes(normalizedQuery)
-        || symbol.displayName.replace('/', '').includes(normalizedQuery),
+        || normalizeSearchToken(symbol.baseAsset).includes(normalizedQuery)
+        || normalizeSearchToken(symbol.displayName).includes(normalizedQuery),
       )
-        .slice(0, 20)
+        .slice(0, 80)
 
   return {
     query,

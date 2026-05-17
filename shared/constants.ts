@@ -10,6 +10,7 @@ export const FEATURED_SYMBOLS = [
   'DOGEUSDT',
   'ADAUSDT',
   'LINKUSDT',
+  'IOSTUSDT',
 ] as const
 
 export const MARKET_INTERVALS = [
