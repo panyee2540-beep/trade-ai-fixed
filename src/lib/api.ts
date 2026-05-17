@@ -1,5 +1,5 @@
 import { DEFAULT_CANDLE_LIMIT } from '../../shared/constants'
-import { fetchMarketCandles, searchMarketSymbols } from '../../shared/market'
+import { fetchMarketCandles, fetchMarketSummary, searchMarketSymbols } from '../../shared/market'
 import { analysisResponseSchema } from '../../shared/schemas'
 import type { AnalysisResponse, Candle } from '../../shared/types'
 
@@ -30,6 +30,10 @@ export async function fetchSearchResults(query: string) {
 
 export async function fetchCandles(symbol: string, interval: string) {
   return fetchMarketCandles(symbol, interval, DEFAULT_CANDLE_LIMIT)
+}
+
+export async function fetchSummary(symbol: string) {
+  return fetchMarketSummary(symbol)
 }
 
 function buildAnalysisCacheKey(symbol: string, timeframe: string, candles: Candle[]) {
