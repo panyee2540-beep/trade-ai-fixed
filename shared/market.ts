@@ -2,6 +2,7 @@ import { DEFAULT_CANDLE_LIMIT, FEATURED_SYMBOLS, MARKET_INTERVALS, MAX_CANDLE_LI
 import type { Candle, MarketCandlesResponse, MarketInterval, MarketSearchResponse, MarketSummary, MarketSymbol } from './types'
 
 const BINANCE_API_BASE = 'https://api.binance.com'
+let exchangeInfoPromise: Promise<MarketSymbol[]> | null = null
 
 interface BinanceExchangeSymbol {
   symbol: string
@@ -61,11 +62,18 @@ async function fetchBinanceJson<T>(path: string) {
 }
 
 async function fetchExchangeInfo() {
-  const data = await fetchBinanceJson<BinanceExchangeInfo>('/api/v3/exchangeInfo')
+  if (!exchangeInfoPromise) {
+    exchangeInfoPromise = fetchBinanceJson<BinanceExchangeInfo>('/api/v3/exchangeInfo')
+      .then((data) => data.symbols
+        .filter((symbol) => symbol.status === 'TRADING' && symbol.isSpotTradingAllowed && symbol.quoteAsset === 'USDT')
+        .map(normalizeSymbolRecord))
+      .catch((error) => {
+        exchangeInfoPromise = null
+        throw error
+      })
+  }
 
-  return data.symbols
-    .filter((symbol) => symbol.status === 'TRADING' && symbol.isSpotTradingAllowed && symbol.quoteAsset === 'USDT')
-    .map(normalizeSymbolRecord)
+  return exchangeInfoPromise
 }
 
 export async function searchMarketSymbols(query: string): Promise<MarketSearchResponse> {
